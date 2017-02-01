@@ -1,0 +1,8 @@
+{
+  "name": "RNGenericPasswordComponent",
+  "version": "1.0.0",
+  "description": "LastPass & 1Password React Native component",
+  "main": "RNGenericPassword.ios.js",
+  "author": "Maz Ahmadi",
+  "license": "MIT"
+}
