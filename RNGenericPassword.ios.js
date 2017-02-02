@@ -1,4 +1,3 @@
-import { NativeModules } from 'react-native';
-
-export default class NativeModules.GenericPasswordExtension;
+const NativeModules = require('react-native');
+module.exports = NativeModules.GenericPasswordExtension;
 
