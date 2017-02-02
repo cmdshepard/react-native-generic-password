@@ -1,10 +1,14 @@
 {
-  "name": "RNGenericPasswordComponent",
+  "name": "react-native-generic-password",
   "version": "1.0.0",
   "description": "LastPass & 1Password React Native component",
   "main": "RNGenericPassword.ios.js",
   "author": "Maz Ahmadi <hello@maziar.io>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cmdshepard/react-native-generic-password"
+  },
   "dependencies": {
     "react-native": "0.38"
   }
