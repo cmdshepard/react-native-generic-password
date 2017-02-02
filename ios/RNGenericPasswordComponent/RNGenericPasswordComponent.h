@@ -9,6 +9,8 @@
 #import <UIKit/UIKit.h>
 #import <MobileCoreServices/MobileCoreServices.h>
 
+#import "RCTBridgeModule.h"
+
 #ifdef __IPHONE_8_0
 #import <WebKit/WebKit.h>
 #endif
@@ -46,7 +48,7 @@
 // conflicts for adopters of your library, you should rename the GenericPasswordExtension class.
 // You might to so by adding your own project prefix, e.g., MyLibraryGenericPasswordExtension.
 
-@interface GenericPasswordExtension : NSObject
+@interface GenericPasswordExtension : NSObject <RCTBridgeModule>
 
 + (GenericPasswordExtension *)sharedExtension;
 

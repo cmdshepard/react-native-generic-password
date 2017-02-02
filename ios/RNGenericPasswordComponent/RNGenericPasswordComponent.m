@@ -23,6 +23,9 @@ static NSString *const AppExtensionWebViewPageDetails = @"pageDetails";
 
 @implementation GenericPasswordExtension
 
+// Export module to React Native
+RCT_EXPORT_MODULE();
+
 #pragma mark - Public Methods
 
 + (GenericPasswordExtension *)sharedExtension {
@@ -50,6 +53,15 @@ static NSString *const AppExtensionWebViewPageDetails = @"pageDetails";
     }
     
     return NO;
+}
+
+RCT_EXPORT_METHOD(isAvailable:(void *) resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    if ([self isAppExtensionAvailable]) {
+        resolve(@YES);
+    } else {
+        NSError *error;
+        reject(@"not_available", @"Extension is not available", error);
+    }
 }
 
 - (void)findLoginForURLString:(NSString *)URLString forViewController:(UIViewController *)viewController sender:(id)sender completion:(void (^)(NSDictionary *loginDictionary, NSError *error))completion {
@@ -99,6 +111,23 @@ static NSString *const AppExtensionWebViewPageDetails = @"pageDetails";
     
     [viewController presentViewController:activityViewController animated:YES completion:nil];
 #endif
+}
+
+RCT_EXPORT_METHOD(getCredentials:(NSString *)domainName resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject){
+    UIViewController *containerView;
+    
+    [self findLoginForURLString:domainName forViewController:containerView sender:nil completion:^(NSDictionary *loginDict, NSError *error) {
+        if (!loginDict) {
+            error.code != AppExtensionErrorCodeCancelledByUser ? reject(@"getCredentials_err", @"Error raised from getCredentials", error) : resolve(nil);
+        } else {
+            NSDictionary *response = @{
+                @"title":loginDict[AppExtensionTitleKey],
+                @"username":loginDict[AppExtensionUsernameKey],
+                @"password":loginDict[AppExtensionPasswordKey]
+            };
+            resolve(response);
+        }
+    }];
 }
 
 - (void)storeLoginForURLString:(NSString *)URLString loginDetails:(NSDictionary *)loginDetailsDict passwordGenerationOptions:(NSDictionary *)passwordGenerationOptions forViewController:(UIViewController *)viewController sender:(id)sender completion:(void (^)(NSDictionary *, NSError *))completion {
@@ -158,6 +187,25 @@ static NSString *const AppExtensionWebViewPageDetails = @"pageDetails";
 #endif
 }
 
+RCT_EXPORT_METHOD(storeCredentials:(NSString *)URLString loginDetails:(NSDictionary *)loginDetailsDict resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject){
+    NSDictionary *newLoginDetails = @{
+        AppExtensionTitleKey: loginDetailsDict[@"title"],
+        AppExtensionUsernameKey: loginDetailsDict[@"username"],
+        AppExtensionNotesKey: loginDetailsDict[@"notes"],
+        AppExtensionSectionTitleKey: loginDetailsDict[@"title"],
+    };
+    
+    UIViewController *containerView;
+    
+    [self storeLoginForURLString:URLString loginDetails:newLoginDetails passwordGenerationOptions:nil forViewController:containerView sender:nil completion:^(NSDictionary *loginDict, NSError *error) {
+        if (!loginDict) {
+            error.code != AppExtensionErrorCodeCancelledByUser ? reject(@"storeCredentials_err", @"Error raised from storeCredentials", error) : resolve(@NO);
+        } else {
+            resolve(@YES);
+        }
+    }];
+}
+
 - (void)changePasswordForLoginForURLString:(NSString *)URLString loginDetails:(NSDictionary *)loginDetailsDict passwordGenerationOptions:(NSDictionary *)passwordGenerationOptions forViewController:(UIViewController *)viewController sender:(id)sender completion:(void (^)(NSDictionary *loginDict, NSError *error))completion {
     NSAssert(URLString != nil, @"URLString must not be nil");
     NSAssert(viewController != nil, @"viewController must not be nil");
@@ -211,6 +259,26 @@ static NSString *const AppExtensionWebViewPageDetails = @"pageDetails";
     
     [viewController presentViewController:activityViewController animated:YES completion:nil];
 #endif
+}
+
+RCT_EXPORT_METHOD(changePassword:(NSString *)URLString loginDetails:(NSDictionary *)newLoginDetails resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject){
+    NSDictionary *loginDetails = @{
+        AppExtensionTitleKey: newLoginDetails[@"title"],
+        AppExtensionUsernameKey: newLoginDetails[@"username"],
+        AppExtensionPasswordKey: newLoginDetails[@"newPassword"],
+        AppExtensionOldPasswordKey: newLoginDetails[@"oldPassword"],
+        AppExtensionNotesKey: newLoginDetails[@"notes"]
+    };
+    
+    UIViewController *containerView;
+    
+    [self changePasswordForLoginForURLString:URLString loginDetails:loginDetails passwordGenerationOptions:nil forViewController:containerView sender:nil completion:^(NSDictionary *loginDict, NSError *error) {
+        if (!loginDict) {
+            error.code != AppExtensionErrorCodeCancelledByUser ? reject(@"changePassword_err", @"Error raised in changePassword", error) : resolve(@NO);
+        } else {
+            resolve(@YES);
+        }
+    }];
 }
 
 - (void)fillLoginIntoWebView:(id)webView forViewController:(UIViewController *)viewController sender:(id)sender completion:(void (^)(BOOL success, NSError *error))completion {
