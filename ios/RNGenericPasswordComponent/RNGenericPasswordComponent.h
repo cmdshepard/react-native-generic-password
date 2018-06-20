@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import <MobileCoreServices/MobileCoreServices.h>
 
-#import "RCTBridgeModule.h"
+#import "React/RCTBridgeModule.h"
 
 #ifdef __IPHONE_8_0
 #import <WebKit/WebKit.h>
